@@ -1,0 +1,171 @@
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Ciudadanos</title>
+  <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  
+  
+</head>
+<body class="p-4">
+  <h1 class="mb-4">Listado de Ciudadanos</h1>
+  
+  
+
+  <div>
+<br>
+<div>
+  <img src="localhost:4100/qrCodes/qr_14.png" alt="" > <br>
+</div>
+  
+  <button class="btn btn-primary" onclick="opencrearCiudadano()"> agregar Ciudadanos</button> <br>
+  </div>
+  <br>
+  <div id="errorContainer" class="alert alert-danger" style="display:none;"></div>
+
+  <table id="tabla-ciudadanos" class="table table-striped table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th>Apellidos</th>
+        <th>Apodo</th>
+        <th>Fecha Nac.</th>
+        <th>Planeta Residencia</th>
+        <th>Planeta Origen</th>
+        <th>Estado</th>
+        <th>QR</th>
+        <th>Funciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="editForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Ciudadano</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editCodigo">
+        <div class="mb-3">
+          <label for="editNombre" class="form-label">Nombre</label>
+          <input type="text" id="editNombre" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="editApellidos" class="form-label">Apellidos</label>
+          <input type="text" id="editApellidos" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="editApodo" class="form-label">Apodo</label>
+          <input type="text" id="editApodo" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="editFechaNacimiento" class="form-label">Fecha Nacimiento</label>
+          <input type="date" id="editFechaNacimiento" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="editPlanetaOrigen" class="form-label">Planeta Origen</label>
+          <input type="text" id="editPlanetaOrigen" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="editPlanetaResidencia" class="form-label">Planeta Residencia</label>
+          <input type="text" id="editPlanetaResidencia" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Estado</label><br>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="editEstado" id="estadoVivo" value="1">
+            <label class="form-check-label" for="estadoVivo">Vivo</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="editEstado" id="estadoMuerto" value="0">
+            <label class="form-check-label" for="estadoMuerto">Muerto</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="editEstado" id="estadoCongelado" value="2">
+            <label class="form-check-label" for="estadoCongelado">Congelado</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+ <div class="modal fade" id="Modal" tabindex="-1"> 
+  <div class="modal-dialog">
+    <form id="crearCiudadano" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Crear Ciudadano</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="Codigo">
+        <div class="mb-3">
+          <label for="Nombre" class="form-label">Nombre</label>
+          <input type="text" id="Nombre" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="Apellidos" class="form-label">Apellidos</label>
+          <input type="text" id="Apellidos" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="Apodo" class="form-label">Apodo</label>
+          <input type="text" id="Apodo" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="FechaNacimiento" class="form-label">Fecha Nacimiento</label>
+          <input type="date" id="FechaNacimiento" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="PlanetaOrigen" class="form-label">Planeta Origen</label>
+          <input type="text" id="PlanetaOrigen" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="PlanetaResidencia" class="form-label">Planeta Residencia</label>
+          <input type="text" id="PlanetaResidencia" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Estado</label><br>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="Estado" id="estadoVivo" value="1">
+            <label class="form-check-label" for="estadoVivo">Vivo</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="Estado" id="estadoMuerto" value="0">
+            <label class="form-check-label" for="estadoMuerto">Muerto</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="Estado" id="estadoCongelado" value="2">
+            <label class="form-check-label" for="estadoCongelado">Congelado</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+  <script type="module" src="./src/main.js"></script>
+  <script type="module" src="./src/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
