@@ -4,6 +4,9 @@ import cors from 'cors';
 import ciudadano from './src/ciudadanos.js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import usuario from './src/routes/usuarios.js';  
+
+   
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -15,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/usuario', usuario);    
 app.use('/ciudadano', ciudadano);                 
 app.use('/', express.static(path.join(process.cwd(), 'public')));  
 
