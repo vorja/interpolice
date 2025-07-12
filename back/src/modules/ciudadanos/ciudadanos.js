@@ -1,5 +1,5 @@
 import express from 'express';
-import dbconn from './dbconeccion.js';
+import dbconn from './config/dbconeccion.js';
 import QRCode from 'qrcode';
 
 import { fileURLToPath } from 'url';

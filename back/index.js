@@ -4,7 +4,7 @@ import cors from 'cors';
 import ciudadano from './src/ciudadanos.js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import usuario from './src/routes/usuarios.js';  
+import usuario from './src/modules/usuarios/usuarios.js';  
 
    
 

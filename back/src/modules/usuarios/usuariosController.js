@@ -1,4 +1,4 @@
-import dbconn from '../dbconeccion.js';
+import dbconn from '../../config/dbconeccion.js';
 import bcrypt from 'bcrypt';
 
 export async function listarTodosUsuarios(req, res) {
