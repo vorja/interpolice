@@ -3,7 +3,7 @@ import multer from 'multer';
 import path, { dirname } from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { listCiudadanos, showCiudadano, createCiudadano, updateCiudadanoCtrl, deleteCiudadano } from './ciudadano.controller.js';
+import { listCiudadanos, showCiudadano, createCiudadano, updateCiudadanoCtrl, deleteCiudadano, updateCiudadanoFotoCtrl} from './ciudadano.controller.js';
 import { verifyToken } from '../../config/authMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 // Configuración de almacenamiento para multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../../fotos');
+    const uploadPath = path.join(__dirname, '../../../fotos');
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
@@ -44,6 +44,7 @@ router.get('/ciudadanos/listar', verifyToken, listCiudadanos);
 router.get('/ciudadanos/listar/:codigo', verifyToken, showCiudadano);
 router.post('/ciudadanos/crear/', verifyToken, upload.single('foto'), createCiudadano);
 router.put('/ciudadanos/actualizar/:id', verifyToken, upload.single('foto'), updateCiudadanoCtrl);
+router.put('/ciudadanos/actualizarFoto/:id', verifyToken, upload.single('foto'), updateCiudadanoFotoCtrl);
 router.put('/ciudadanos/eliminar/:id', verifyToken, deleteCiudadano);
 
 export default router;

@@ -54,7 +54,7 @@ export async function createCiudadano(req, res) {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const qrUrlLink = `${baseUrl}/ciudadanos/listar/${data.codigo}`;
     const qrFileName = `${data.codigo}.png`;
-    const qrDir = path.join(__dirname, '../qr');
+    const qrDir = path.join(__dirname, '../../../qr');
     if (!fs.existsSync(qrDir)) {
       fs.mkdirSync(qrDir, { recursive: true });
     }
@@ -114,6 +114,41 @@ export async function updateCiudadanoCtrl(req, res) {
     res.status(500).send({ estado: 'Error', mensaje: 'Error en la consulta', data: err.code, error: err.message });
   }
 }
+
+export async function updateCiudadanoFotoCtrl(req, res) {
+  try {
+    const id = req.params.id;
+    const current = await getCiudadanoByCodigo(id);
+    const currentPhoto = current.length > 0 ? current[0].foto : 'default.png';
+    const data = {
+      foto: req.file ? req.file.filename : currentPhoto
+    };
+
+    // Generar nuevo QR apuntando a la misma ruta de detalle
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const qrUrlLink = `${baseUrl}/ciudadanos/listar/${id}`;
+    const qrFileName = `${id}.png`;
+    const qrDir = path.join(__dirname, '../qr');
+    if (!fs.existsSync(qrDir)) {
+      fs.mkdirSync(qrDir, { recursive: true });
+    }
+    const qrPath = path.join(qrDir, qrFileName);
+    await QRCode.toFile(qrPath, qrUrlLink);
+    data.qr = `/qr/${qrFileName}`;
+
+    const ok = await updateCiudadano(id, data);
+    if (ok) {
+      res.send({ estado: 'ok', mensaje: 'ciudadano actualizado', data: { id, ...data } });
+    } else {
+      res.status(404).send({ estado: 'Error', mensaje: 'ciudadano no encontrado', data: null });
+    }
+  } catch (err) {
+    console.error('Error al actualizar ciudadano:', err);
+    res.status(500).send({ estado: 'Error', mensaje: 'Error en la consulta', data: err.code, error: err.message });
+  }
+}
+
+
 
 export async function deleteCiudadano(req, res) {
   try {
