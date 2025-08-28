@@ -75,7 +75,7 @@ usuarios.get("/usuario/listar/:id", verifyToken, async (req, res) => {
 });
 
 // Insertar usuario método POST
-usuarios.post("/usuario/crear/",/* verifyToken,*/ async (req, res) => {
+usuarios.post("/usuario/crear/", verifyToken, async (req, res) => {
     try {
         // Hashear la contraseña
         const saltRounds = 10;
@@ -203,7 +203,6 @@ usuarios.delete("/usuario/eliminar/:id", verifyToken, async (req, res) => {
     }
 });
 
-// Ruta adicional para obtener todos los roles (útil para formularios)
 usuarios.get("/roles/listar", verifyToken, async (req, res) => {
     try {
         let consulta = "SELECT * FROM roles ORDER BY id";
@@ -224,7 +223,6 @@ usuarios.get("/roles/listar", verifyToken, async (req, res) => {
     }
 });
 
-// Endpoint de login
 usuarios.post("/usuario/login",  async (req, res) => {
     try {
         const { usuario, pass } = req.body;
@@ -288,5 +286,4 @@ usuarios.post("/usuario/login",  async (req, res) => {
     }
 });
 
-// Exportamos el router para usarlo en otros archivos
 export default usuarios;

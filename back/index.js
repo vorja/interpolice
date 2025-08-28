@@ -21,6 +21,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+require('dotenv').config()
+
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 app.use('/qrCodes', express.static(__dirname + '/qrCodes'));
 
 app.use("/api", usuarios); 

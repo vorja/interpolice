@@ -50,7 +50,7 @@ const upload = multer({
 console.log("Conexion a la DB EXITOSA (ciudadanos.js)");
 
 //consulta para listar todos los ciudadanos
-ciudadanos.get("/ciudadano/listar", verifyToken, async (req, res) => {
+ciudadanos.get("/ciudadanos/listar", verifyToken, async (req, res) => {
     try {
         let consulta = "SELECT * FROM ciudadano where Actividad = 'Activo' ORDER BY codigo DESC";
 
@@ -72,7 +72,7 @@ ciudadanos.get("/ciudadano/listar", verifyToken, async (req, res) => {
 });
 
 //busqueda por id (codigo)
-ciudadanos.get("/ciudadano/listar/:codigo", verifyToken, async (req, res) => {
+ciudadanos.get("/ciudadanos/listar/:codigo", verifyToken, async (req, res) => {
     try {
         let codigo = req.params.codigo;
         console.log("codigo solicitado: ", codigo);
@@ -104,7 +104,7 @@ ciudadanos.get("/ciudadano/listar/:codigo", verifyToken, async (req, res) => {
 })
 
 //insertar ciudadano metodo POST con subida de archivo
-ciudadanos.post("/ciudadano/crear/", verifyToken, upload.single('foto'), async (req, res) => {
+ciudadanos.post("/ciudadanos/crear/", verifyToken, upload.single('foto'), async (req, res) => {
     try {
         // Generar código único
         const codigo = Date.now();
@@ -180,7 +180,7 @@ ciudadanos.post("/ciudadano/crear/", verifyToken, upload.single('foto'), async (
 })
 
 //editar ciudadano metodo PUT con subida de archivo opcional
-ciudadanos.put('/ciudadano/actualizar/:id', verifyToken, upload.single('foto'), async (req, res) => {
+ciudadanos.put('/ciudadanos/actualizar/:id', verifyToken, upload.single('foto'), async (req, res) => {
     try {
         let id = req.params.id;
         
@@ -250,7 +250,7 @@ ciudadanos.put('/ciudadano/actualizar/:id', verifyToken, upload.single('foto'), 
 });
 
 //eliminar ciudadano metodo PUT poniendo el estado en 0
-ciudadanos.put('/ciudadano/eliminar/:id', verifyToken, async (req, res) => {
+ciudadanos.put('/ciudadanos/eliminar/:id', verifyToken, async (req, res) => {
     try {
         let id = req.params.id;
 
