@@ -10,11 +10,11 @@ import { verifyToken } from "./src/config/authMiddleware.js";
    
 
 import ciudadanos from "./src/modules/ciudadanos/ciudadano.routes.js";
-import usuarios from "./src/modules/usuarios/usuarios.js";
-import delitoTipos from "./src/modules/delitoTipos/delitoTipos.js";
-import delitoEventos from "./src/modules/delitoEventos/delitoEventos.routes.js";
-import antecedentes from "./src/modules/antecedentes/antecedentes.js";
-import amonestaciones from "./src/modules/amonestaciones/amonestaciones.js";
+import usuarios from "./src/modules/usuarios/usuarios.routes.js";
+import delitoTipos from "./src/modules/delitoTipos/delitoTipos.routes.js";
+import delitoEventos from "./src/modules/delitoEventos/delitoEventos.routes.routes.js";
+import antecedentes from "./src/modules/antecedentes/antecedentes.routes.js";
+import amonestaciones from "./src/modules/amonestaciones/amonestaciones.routes.js";
   
 
 const __filename = fileURLToPath(import.meta.url);
