@@ -12,7 +12,7 @@ import {
 
 const router = Router();
 
-router.get('/usuarios/listar', listUsers);
+router.get('/usuarios/listar', verifyToken, listUsers);
 router.get('/usuarios/listar/:id', verifyToken, showUser);
 router.post('/usuarios/crear/', verifyToken, createUserCtrl);
 router.put('/usuarios/actualizar/:id', verifyToken, updateUserCtrl);
