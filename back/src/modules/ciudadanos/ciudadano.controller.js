@@ -62,12 +62,8 @@ export async function createCiudadano(req, res) {
     await QRCode.toFile(qrPath, qrUrlLink);
     data.qr = `/qr/${qrFileName}`;
 
-    const insertId = await insertCiudadano(data);
-    if (insertId) {
-      res.send({ estado: 'ok', mensaje: 'ciudadano creado', data: { id: insertId, ...data } });
-    } else {
-      res.status(404).send({ estado: 'Error', mensaje: 'ciudadano no creado', data: null });
-    }
+    res.send({ estado: 'ok', mensaje: 'ciudadano creado', data: { id: codigo, ...data } });
+    
   } catch (err) {
     console.error('Error al crear ciudadano:', err);
     res.status(500).send({ estado: 'Error', mensaje: 'Error en la consulta', data: err.code, error: err.message });
