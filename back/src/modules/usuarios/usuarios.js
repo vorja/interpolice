@@ -10,7 +10,7 @@ const usuarios = express.Router();
 console.log("Conexión a la DB EXITOSA (usuarios.js)");
 
 // Consulta para listar todos los usuarios con información del rol
-usuarios.get("/usuario/listar", verifyToken, async (req, res) => {
+usuarios.get("/usuario/listar", /*verifyToken,*/ async (req, res) => {
     try {
         let consulta = `
             SELECT usuarios.id, usuarios.usuario, usuarios.pass, usuarios.fecha_creacion, usuarios.rol_id, roles.rol 
