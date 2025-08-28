@@ -4,9 +4,10 @@ import 'dotenv/config';
 
 //creamos el objeto de conexión a la base de datos deacuerdo a la librería mysql2
 const dbconn = await mysql.createConnection({
-    host: process.env.HOST,
-    user: process.env.DB_USER,
-    database: process.env.DB_DATABASE,
+    host: process.env.DB_host,
+    user: process.env.DB_user,
+    password: process.env.DB_password,
+    database: process.env.DB_database
 });
 
 try {
