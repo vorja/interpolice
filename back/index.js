@@ -12,7 +12,7 @@ import { verifyToken } from "./src/config/authMiddleware.js";
 import ciudadanos from "./src/modules/ciudadanos/ciudadanos.js";
 import usuarios from "./src/modules/usuarios/usuarios.js";
 import delitoTipos from "./src/modules/delitoTipos/delitoTipos.js";
-import delitoEventos from "./src/modules/delitoEventos/delitoEventos.js";
+import delitoEventos from "./src/modules/delitoEventos/delitos.js";
 import antecedentes from "./src/modules/antecedentes/antecedentes.js";
 import amonestaciones from "./src/modules/amonestaciones/amonestaciones.js";
   

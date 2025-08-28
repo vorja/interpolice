@@ -7,7 +7,7 @@ export function verifyToken(req, res, next) {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
     if (err) return res.status(403).json({ error: "Token inválido o expirado" });
-    req.user = payload; // { id, usuario, rol_id, iat, exp }
+    req.user = payload; 
     next();
   });
 }

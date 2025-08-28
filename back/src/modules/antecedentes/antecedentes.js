@@ -4,7 +4,6 @@ import dbconn from "../../config/dbconeccion.js";
 const router = Router();
 console.log("Conexión a la DB EXITOSA (antecedentes.js)");
 
-// GET /api/antecedentes?ciudadano=...
 router.get("/antecedentes", async (req, res) => {
   try {
     const { ciudadano } = req.query;
@@ -28,7 +27,6 @@ router.get("/antecedentes", async (req, res) => {
   }
 });
 
-// GET /api/antecedentes/:id
 router.get("/antecedentes/:id", async (req, res) => {
   try {
     const [[a]] = await dbconn.query("SELECT * FROM antecedente WHERE id=?", [req.params.id]);
@@ -45,7 +43,6 @@ router.get("/antecedentes/:id", async (req, res) => {
 
     let tipos = t1.map(r => r.nombre);
 
-    // 2) Fallback: si no hay, toma tipos del evento (si hay evento)
     if (!tipos.length && a.evento_id) {
       const [t2] = await dbconn.query(
         `SELECT dt.nombre
@@ -57,7 +54,6 @@ router.get("/antecedentes/:id", async (req, res) => {
       tipos = t2.map(r => r.nombre);
     }
 
-    // 3) (opcional) trae datos del evento
     let evento = null;
     if (a.evento_id) {
       const [[e]] = await dbconn.query(
@@ -74,7 +70,6 @@ router.get("/antecedentes/:id", async (req, res) => {
 });
 
  
-// POST /api/antecedentes
 router.post("/antecedentes", async (req, res) => {
   const conn = await dbconn.getConnection();
   try {
@@ -131,7 +126,6 @@ router.post("/antecedentes", async (req, res) => {
   }
 });
 
-// PATCH /api/antecedentes/:id/cerrar
 router.patch("/antecedentes/:id/cerrar", async (req, res) => {
   try {
     const [r] = await dbconn.query(
