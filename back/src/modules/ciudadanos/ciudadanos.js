@@ -1,170 +1,280 @@
 import express from 'express';
-import dbconn from './config/dbconeccion.js';
+import dbconn from '../../config/dbconeccion.js';
+import path, { dirname } from 'path';     
+import fs from 'fs';
 import QRCode from 'qrcode';
-
 import { fileURLToPath } from 'url';
-import path from 'path';
-import fs from 'fs/promises';
-
-
+import multer from 'multer';
+import { verifyToken } from "../../config/authMiddleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
-const ciudadano = express.Router();
+//Rutas para ciudadanos
+const ciudadanos = express.Router();
 
-ciudadano.get('/listarTodos', async (req, res) => {
-    try {
-        //consulta
-        const sql = 'SELECT * FROM ciudadano';
-
-        //ejecutamos la consulta y guardamos el resultado en un arreglo de objetos
-        const [resultado] = await dbconn.execute(sql);
-
-        res.send({ resultado });
-    } catch (err) {
-        console.error('Error al listar ciudadano:', err);
-        res.status(500).json({ error: 'Error al listar ciudadano' });
+// Configuración de multer para subida de archivos
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadPath = path.join(__dirname, '../fotos');
+        // Crear carpeta si no existe
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+        // Generar nombre único para el archivo
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, 'ciudadano-' + uniqueSuffix + ext);
     }
 });
 
-ciudadano.get('/buscarxid/:id', async (req, res) => {
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB límite
+    },
+    fileFilter: (req, file, cb) => {
+        // Solo permitir imágenes
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Solo se permiten archivos de imagen'), false);
+        }
+    }
+});
+
+//esperamos la conexion
+console.log("Conexion a la DB EXITOSA (ciudadanos.js)");
+
+//consulta para listar todos los ciudadanos
+ciudadanos.get("/ciudadano/listar", verifyToken, async (req, res) => {
     try {
-        //recibir el parametro id desde la url
-        let id = req.params.id;
+        let consulta = "SELECT * FROM ciudadano where Actividad = 'Activo' ORDER BY codigo DESC";
 
-        let sql = 'SELECT * FROM ciudadano WHERE codigo = ?';
-
-        let [resultado] = await dbconn.execute(sql, [id]);
-
-        //verificamos si el resultado es un arreglo y tiene al menos un elemento
+        let [resultado] = await dbconn.query(consulta);
         res.send({
             estado: "ok",
-            mensaje: "ciudadano encontrado",
-            data: resultado,
+            mensaje: "Lista de ciudadanos",
+            data: resultado
         });
-
     } catch (err) {
-        console.error('Error al buscar ciudadano por ID:', err);
-        res.status(500).json({ error: 'Error al buscar ciudadano por ID' });
+        res.status(500).send({
+            estado: "Error",
+            mensaje: "Error en la consulta",
+            data: err.code,
+            error: err.message,
+            sql: err.sql,
+        });
     }
 });
 
-ciudadano.post('/crear', async (req, res) => {
+//busqueda por id (codigo)
+ciudadanos.get("/ciudadano/listar/:codigo", verifyToken, async (req, res) => {
     try {
-        let datosFormulario = {
-            nombre: req.body.nombre,
-            apellidos: req.body.apellidos,
-            apodo: req.body.apodo,
-            fechaNacimiento: req.body.fechaNacimiento,
-            planetaOrigen: req.body.planetaOrigen,
-            planetaResidencia: req.body.planetaResidencia,
-            
-        };
-
-       
-        let sql = 'INSERT INTO ciudadano (nombre, apellidos, apodo, fechaNacimiento, planetaOrigen, planetaResidencia) VALUES (?, ?, ?, ?, ?, ?)';
-
-        let [resultado] = await dbconn.execute(sql, [datosFormulario.nombre, datosFormulario.apellidos, datosFormulario.apodo, datosFormulario.fechaNacimiento, datosFormulario.planetaOrigen, datosFormulario.planetaResidencia]);
-       
-        const newId = resultado.insertId; 
-
-    
-        const qrText = `https://localhost:4100/ciudadano/${newId}`;
-        const qrBuffer = await QRCode.toBuffer(qrText);
-
-        const qrDir = path.join(__dirname, '..', 'qrCodes');
-        const filename = `qr_${newId}.png`;
-        const filepath = path.join(qrDir, filename);
-        await fs.writeFile(filepath, qrBuffer);
-
-        const qrUrl = `/qrCodes/${filename}`;
-
-        const sqlUpdate = 'UPDATE ciudadano SET codigoQr = ? WHERE codigo = ?';
-        await dbconn.execute(sqlUpdate, [qrUrl, newId]);
-
-
-        res.send({
-            estado: "ok",
-            mensaje: "ciudadano actualizado a muerto correctamente",
-        });
-    } catch (err) {
-       
-        console.error('Error al crear ciudadano:', err);
-        res.status(500).json({ error: 'Error al crear ciudadano' });
-    }
-});
-
-ciudadano.put('/actualizar/:id', async (req, res) => {
-    try {
-        //recibir el parametro id desde la url
-        let codigo = req.params.id;
-
-        //recibir los datos del ciudadano
-        let datosFormulario = {
-            nombre: req.body.nombre,
-            apellidos: req.body.apellidos,
-            apodo: req.body.apodo,
-            fechaNacimiento: req.body.fechaNacimiento,
-            planetaOrigen: req.body.planetaOrigen,
-            planetaResidencia: req.body.planetaResidencia,
-            estado: req.body.estado
-        };
-
-        
-        let sql = 'UPDATE ciudadano SET nombre = ?, apellidos = ?, apodo = ?, fechaNacimiento = ?, planetaOrigen = ?, planetaResidencia = ?, estado = ? WHERE codigo = ?';
-
-        let [resultado] = await dbconn.execute(sql, [datosFormulario.nombre, datosFormulario.apellidos, datosFormulario.apodo, datosFormulario.fechaNacimiento, datosFormulario.planetaOrigen, datosFormulario.planetaResidencia, datosFormulario.estado, codigo]);
-
-        res.send({
-            estado: "ok",
-            data: resultado,
-        });
-
-    } catch (err) {
-        console.error('Error al actualizar ciudadano:', err);
-        res.status(500).json({ error: 'Error al actualizar ciudadano' });
-    }
-});
-
-ciudadano.delete('/estadoMuerto/:id', async (req, res) => {
-    try {
-        let id = req.params.id;
-
-        
-        let sql = 'UPDATE ciudadano set estado="0" WHERE codigo = ?';
-
-        let [resultado] = await dbconn.execute(sql, [id]);
-
+        let codigo = req.params.codigo;
+        console.log("codigo solicitado: ", codigo);
+        let consulta = "SELECT * FROM ciudadano WHERE codigo = ?";
+        let [resultado] = await dbconn.query(consulta, [codigo]);
+        if (resultado.length > 0) {
             res.send({
                 estado: "ok",
-                mensaje: "ciudadano actualizado a muerto correctamente",
+                mensaje: "ciudadano encontrado",
+                data: resultado
+            }); 
+        } else {
+            res.status(404).send({
+                estado: "Error",
+                mensaje: "ciudadano no encontrado",
+                data: null
             });
-  
+        }
+    }
+    catch (err) {
+        res.status(500).send({
+            estado: "Error",
+            mensaje: "Error en la consulta",
+            data: err.code,
+            error: err.message,
+            sql: err.sql,
+        });
+    }
+})
 
-    } catch (err) {
-        console.error('Error al eliminar ciudadano:', err);
-        res.status(500).json({ error: 'Error al eliminar ciudadano' });
+//insertar ciudadano metodo POST con subida de archivo
+ciudadanos.post("/ciudadano/crear/", verifyToken, upload.single('foto'), async (req, res) => {
+    try {
+        // Generar código único
+        const codigo = Date.now();
+        
+        //la data del ciudadano se recibe en el cuerpo (body) de la solicitud
+        let data = {
+            codigo: codigo,
+            nombre: req.body.nombre,
+            apellido: req.body.apellido,
+            apodo: req.body.apodo,
+            fechaNacimiento: req.body.fechaNacimiento,
+            planetaOrigen: req.body.planetaOrigen,
+            planetaResidencia: req.body.planetaResidencia,
+            foto: req.file ? req.file.filename : 'default.png', // Usar el nombre del archivo subido
+            estado: req.body.estado || "1"
+        };
+
+        //RELACIONADO QR
+        const qrContent = `
+        Codigo: ${data.codigo}
+        Nombre: ${data.nombre}
+        Planeta de Origen: ${data.planetaOrigen}
+        Planeta de Residencia: ${data.planetaResidencia}
+        Fecha de Nacimiento: ${data.fechaNacimiento}
+        Apodo: ${data.apodo}`; 
+        
+        //ruta donde se guardara el QR y nombre del archivo
+        const fileName = `${data.codigo}.png`;
+        const qrPath = path.join(__dirname, '../qr', fileName);
+        
+        // Crear carpeta qr si no existe
+        const qrDir = path.join(__dirname, '../qr');
+        if (!fs.existsSync(qrDir)) {
+            fs.mkdirSync(qrDir, { recursive: true });
+        }
+        
+        //guardamos el qr en la carpeta qr
+        await QRCode.toFile(qrPath, qrContent);
+        //añadimos al json de data la ruta del qr
+        data.qr = `/qr/${fileName}`;
+
+        // Insertamos el ciudadano en la base de datos
+        const consulta = "INSERT INTO ciudadano SET ?";
+        const [resultado] = await dbconn.query(consulta, [data]);
+        if (resultado.affectedRows > 0) {
+            console.log("ciudadano creado con id: ", data.codigo);
+            res.send({
+                estado: "ok",
+                mensaje: "ciudadano creado",
+                data: {
+                    id: resultado.insertId,
+                    ...data
+                }
+            });
+        } else {
+            res.status(404).send({
+                estado: "Error",
+                mensaje: "ciudadano no creado",
+                data: null
+            });
+        }
+    }
+    catch (err) {
+        console.error("Error al crear ciudadano:", err);
+        res.status(500).send({
+            estado: "Error",
+            mensaje: "Error en la consulta",
+            data: err.code,
+            error: err.message,
+            sql: err.sql,
+        });
+    }
+})
+
+//editar ciudadano metodo PUT con subida de archivo opcional
+ciudadanos.put('/ciudadano/actualizar/:id', verifyToken, upload.single('foto'), async (req, res) => {
+    try {
+        let id = req.params.id;
+        
+        // Primero obtenemos la foto actual
+        const consultaActual = "SELECT foto FROM ciudadano WHERE codigo = ?";
+        const [ciudadanoActual] = await dbconn.query(consultaActual, [id]);
+        
+        let data = {
+            nombre: req.body.nombre,
+            apellido: req.body.apellido,
+            apodo: req.body.apodo,
+            fechaNacimiento: req.body.fechaNacimiento,
+            planetaOrigen: req.body.planetaOrigen,
+            planetaResidencia: req.body.planetaResidencia,
+            foto: req.file ? req.file.filename : (ciudadanoActual[0] ? ciudadanoActual[0].foto : 'default.png'),
+            estado: req.body.estado || "1"
+        };
+        
+        //RELACIONADO QR
+        const qrContent = `
+        Codigo: ${id}
+        Nombre: ${data.nombre}
+        Planeta de Origen: ${data.planetaOrigen}
+        Planeta de Residencia: ${data.planetaResidencia}
+        Fecha de Nacimiento: ${data.fechaNacimiento}
+        Apodo: ${data.apodo}`;
+
+        //ruta donde se guardara el QR y nombre del archivo
+        const fileName = `${id}.png`;
+        const qrPath = path.join(__dirname, '../qr', fileName);
+        
+        //guardamos el qr en la carpeta qr
+        await QRCode.toFile(qrPath, qrContent);
+        //añadimos al json de data la ruta del qr
+        data.qr = `/qr/${fileName}`;    
+
+        //actualizamos el ciudadano en la base de datos
+        const consulta = "UPDATE ciudadano SET ? WHERE codigo = ?";
+        const [resultado] = await dbconn.query(consulta, [data, id]);
+        if (resultado.affectedRows > 0) {
+            res.send({
+                estado: "ok",
+                mensaje: "ciudadano actualizado",
+                data: {
+                    id: id,
+                    ...data
+                }
+            });
+        } else {
+            res.status(404).send({
+                estado: "Error",
+                mensaje: "ciudadano no encontrado",
+                data: null
+            });
+        }
+    }
+    catch (err) {
+        console.error("Error al actualizar ciudadano:", err);
+        res.status(500).send({
+            estado: "Error",
+            mensaje: "Error en la consulta",
+            data: err.code,
+            error: err.message,
+            sql: err.sql,
+        });
     }
 });
-ciudadano.put('/cambiarEstado/:id', async (req, res) => {
+
+//eliminar ciudadano metodo PUT poniendo el estado en 0
+ciudadanos.put('/ciudadano/eliminar/:id', verifyToken, async (req, res) => {
     try {
         let id = req.params.id;
 
-        let nuevoEstado = req.body.nuevoEstado;
-        let sql = 'UPDATE ciudadano SET estado = ? WHERE codigo = ?';
-
-        let [resultado] = await dbconn.execute(sql, [nuevoEstado, id]);
-
+        const consulta = "UPDATE ciudadano SET Actividad = 'Inactivo' WHERE codigo = ?";
+        const [resultado] = await dbconn.query(consulta, [id]);
+        
         res.send({
             estado: "ok",
-            mensaje: "Estado del ciudadano actualizado correctamente",
+            mensaje: "ciudadano eliminado",
+            data: {
+                id: id,
+                Actividad: "Inactivo"
+            }
         });
-
     } catch (err) {
-        console.error('Error al cambiar estado del ciudadano:', err);
-        res.status(500).json({ error: 'Error al cambiar estado del ciudadano' });
+        res.status(500).send({
+            estado: "Error",
+            mensaje: "Error en la consulta",
+            data: err.code,
+            error: err.message,
+            sql: err.sql,
+        });
     }
-});
+}); 
 
-export default ciudadano;
+// exportamos el router para usarlo en otros archivos
+export default ciudadanos;
