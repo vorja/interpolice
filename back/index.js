@@ -3,16 +3,16 @@ import "dotenv/config";
 import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-
+import cors from 'cors';
 
 
 import { verifyToken } from "./src/config/authMiddleware.js";
    
 
-import ciudadanos from "./src/modules/ciudadanos/ciudadanos.js";
+import ciudadanos from "./src/modules/ciudadanos/ciudadano.routes.js";
 import usuarios from "./src/modules/usuarios/usuarios.js";
 import delitoTipos from "./src/modules/delitoTipos/delitoTipos.js";
-import delitoEventos from "./src/modules/delitoEventos/delitos.js";
+import delitoEventos from "./src/modules/delitoEventos/delitoEventos.routes.js";
 import antecedentes from "./src/modules/antecedentes/antecedentes.js";
 import amonestaciones from "./src/modules/amonestaciones/amonestaciones.js";
   
@@ -22,6 +22,8 @@ const __dirname = dirname(__filename);
 
 const app = express();
 import 'dotenv/config';
+
+app.use(cors());
 
 
 app.use(express.json());
