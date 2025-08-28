@@ -30,7 +30,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.use('/qrCodes', express.static(__dirname + '/qrCodes'));
 
 app.use("/api", usuarios); 
 
@@ -42,7 +41,7 @@ app.use("/api", delitoEventos);
 app.use("/api", antecedentes);
 app.use("/api", amonestaciones);
 
-app.use("/qr", express.static(path.join(__dirname, "qr")));
+app.use("./src/modules/qr", express.static(path.join(__dirname, "qr")));
 app.use("/fotos", express.static(path.join(__dirname, "fotos")));
 
 const port = process.env.APP_port || 4100;
